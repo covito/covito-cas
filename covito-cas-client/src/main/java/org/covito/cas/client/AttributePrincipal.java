@@ -14,7 +14,7 @@ public interface AttributePrincipal extends Principal, Serializable {
      * @param service
      * @return
      */
-    String getProxyTicketFor(String service);
+    String getProxyTicket(String service);
 
     /**
      * 获取属性Map
