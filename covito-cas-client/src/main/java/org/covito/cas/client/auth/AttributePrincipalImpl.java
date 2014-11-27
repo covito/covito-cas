@@ -3,7 +3,6 @@ package org.covito.cas.client.auth;
 import java.util.Collections;
 import java.util.Map;
 
-import org.covito.cas.client.AttributePrincipal;
 import org.covito.cas.client.ProxyRetriever;
 import org.junit.Assert;
 import org.slf4j.Logger;

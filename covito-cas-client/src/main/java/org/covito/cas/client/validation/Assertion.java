@@ -1,8 +1,10 @@
-package org.covito.cas.client;
+package org.covito.cas.client.validation;
 
 import java.io.Serializable;
 import java.util.Date;
 import java.util.Map;
+
+import org.covito.cas.client.auth.AttributePrincipal;
 
 /**
  * 票据校验结果

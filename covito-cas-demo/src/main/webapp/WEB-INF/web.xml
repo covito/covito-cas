@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns="http://java.sun.com/xml/ns/javaee" xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+	version="2.5">
+
+	<filter>
+		<description>CAS Client</description>
+		<filter-name>CasClientFilter</filter-name>
+		<filter-class>org.covito.cas.client.filter.CasClientFilter</filter-class>
+		<init-param>
+			<param-name>serverLoginUrl</param-name>
+			<param-value>http://localhost:8082/cas-server/login</param-value>
+		</init-param>
+		<init-param>
+			<param-name>serverName</param-name>
+			<param-value>localhost 127.0.0.1 covito.cn</param-value>
+		</init-param>
+		<!-- <init-param>
+			<param-name>service</param-name>
+			<param-value>http://localhost:8080/cas-demo/index.jsp</param-value>
+		</init-param> -->
+		<!-- <init-param>
+			<param-name>gateway</param-name>
+			<param-value>true</param-value>
+		</init-param> -->
+		<init-param>
+			<param-name>urlPattern</param-name>
+			<param-value>/A.jsp</param-value>
+		</init-param>
+	</filter>
+	
+	<filter-mapping>
+		<filter-name>CasClientFilter</filter-name>
+		<url-pattern>/*</url-pattern>
+	</filter-mapping>
+
+	<!-- Session 配置 -->
+	<session-config>
+		<session-timeout>20</session-timeout>
+	</session-config>
+
+	<welcome-file-list>
+		<welcome-file>index.jsp</welcome-file>
+	</welcome-file-list>
+
+</web-app>

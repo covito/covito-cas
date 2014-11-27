@@ -1,5 +1,7 @@
 package org.covito.cas.client;
 
+import org.covito.cas.client.validation.Assertion;
+
 
 /**
  * 票据验证

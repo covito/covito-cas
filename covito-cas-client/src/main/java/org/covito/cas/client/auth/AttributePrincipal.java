@@ -1,4 +1,4 @@
-package org.covito.cas.client;
+package org.covito.cas.client.auth;
 
 import java.io.Serializable;
 import java.security.Principal;
