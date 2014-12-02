@@ -1,11 +1,11 @@
-package org.covito.cas.client.auth;
+package org.covito.cas.client.provider;
 
 import java.io.IOException;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.covito.cas.client.AuthRedirect;
+import org.covito.cas.client.config.AuthRedirect;
 
 public class DefaultAuthRedirect implements AuthRedirect{
 

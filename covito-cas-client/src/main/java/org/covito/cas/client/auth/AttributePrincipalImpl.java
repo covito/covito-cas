@@ -3,7 +3,7 @@ package org.covito.cas.client.auth;
 import java.util.Collections;
 import java.util.Map;
 
-import org.covito.cas.client.ProxyRetriever;
+import org.covito.cas.client.proxy.ProxyRetriever;
 import org.junit.Assert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,7 +20,7 @@ public class AttributePrincipalImpl extends SimplePrincipal implements Attribute
 	private final Map<String, Object> attributes;
 
 	/**
-	 * 代理授予票据
+	 * 代理授权票据
 	 */
 	private final String proxyGrantingTicket;
 

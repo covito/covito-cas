@@ -1,10 +1,10 @@
-package org.covito.cas.client.filter;
+package org.covito.cas.client.provider;
 
 import java.util.HashSet;
 import java.util.Set;
 import java.util.regex.Pattern;
 
-import org.covito.cas.client.UrlMatcher;
+import org.covito.cas.client.config.UrlMatcher;
 
 /**
  * 正则匹配URL

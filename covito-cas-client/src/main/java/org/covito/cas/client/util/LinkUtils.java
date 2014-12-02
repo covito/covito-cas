@@ -1,8 +1,20 @@
 package org.covito.cas.client.util;
 
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.lang3.StringUtils;
+import org.covito.cas.client.ssl.HttpURLConnectionFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class LinkUtils {
+	
+	private static final Logger logger = LoggerFactory.getLogger(LinkUtils.class);
 
 	/**
 	 * 获取匹配serverName
@@ -73,6 +85,7 @@ public class LinkUtils {
 
 	/**
 	 * 从request中获取参数
+	 * 
 	 * @param request
 	 * @param name
 	 * @return
@@ -81,7 +94,38 @@ public class LinkUtils {
 		if ("POST".equals(request.getMethod())) {
 			return request.getParameter(name);
 		}
-		return request.getQueryString() == null || 
-				!request.getQueryString().contains(name) ? null : request.getParameter(name);
+		return request.getQueryString() == null || !request.getQueryString().contains(name) ? null : request
+				.getParameter(name);
 	}
+
+	public static String getResponseFromServer(URL constructedUrl, HttpURLConnectionFactory factory, String encoding) {
+		HttpURLConnection conn = null;
+		InputStreamReader in = null;
+		try {
+			conn = factory.buildConnection(constructedUrl.openConnection());
+			if (StringUtils.isEmpty(encoding)) {
+				in = new InputStreamReader(conn.getInputStream());
+			} else {
+				in = new InputStreamReader(conn.getInputStream(), encoding);
+			}
+			final StringBuilder builder = new StringBuilder(255);
+			int byteRead;
+			while ((byteRead = in.read()) != -1) {
+				builder.append((char) byteRead);
+			}
+			return builder.toString();
+		} catch (final Exception e) {
+			logger.error(e.getMessage(), e);
+			throw new RuntimeException(e);
+		} finally {
+			try {
+				in.close();
+			} catch (IOException e) {
+			}
+			if (conn != null) {
+				conn.disconnect();
+			}
+		}
+	}
+
 }

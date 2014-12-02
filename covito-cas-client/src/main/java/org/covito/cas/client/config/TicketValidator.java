@@ -1,4 +1,4 @@
-package org.covito.cas.client;
+package org.covito.cas.client.config;
 
 import org.covito.cas.client.validation.Assertion;
 
@@ -16,4 +16,10 @@ public interface TicketValidator {
      */
     Assertion validate(String ticket, String service);
     
+    /**
+     * 验证器初始化
+     * @param config
+     * @return
+     */
+    void initValidator(ConfigManager config);
 }

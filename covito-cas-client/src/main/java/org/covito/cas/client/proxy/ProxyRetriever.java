@@ -1,4 +1,4 @@
-package org.covito.cas.client;
+package org.covito.cas.client.proxy;
 
 import java.io.Serializable;
 

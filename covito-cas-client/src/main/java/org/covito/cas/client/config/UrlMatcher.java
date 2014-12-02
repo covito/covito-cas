@@ -1,4 +1,4 @@
-package org.covito.cas.client;
+package org.covito.cas.client.config;
 
 /**
  * 定制哪些url可不被拦截

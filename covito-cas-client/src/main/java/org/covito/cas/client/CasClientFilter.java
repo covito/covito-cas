@@ -1,12 +1,9 @@
-package org.covito.cas.client.filter;
+package org.covito.cas.client;
 
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.util.Properties;
 
-import javax.net.ssl.HostnameVerifier;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
@@ -19,13 +16,15 @@ import javax.servlet.http.HttpSession;
 
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.covito.cas.client.AuthRedirect;
-import org.covito.cas.client.GatewayResolver;
-import org.covito.cas.client.TicketValidator;
-import org.covito.cas.client.UrlMatcher;
-import org.covito.cas.client.auth.DefaultAuthRedirect;
-import org.covito.cas.client.auth.DefaultGatewayResolver;
+import org.covito.cas.client.config.AuthRedirect;
+import org.covito.cas.client.config.ConfigManager;
+import org.covito.cas.client.config.GatewayResolver;
+import org.covito.cas.client.config.TicketValidator;
+import org.covito.cas.client.config.UrlMatcher;
 import org.covito.cas.client.exception.TicketValidationException;
+import org.covito.cas.client.provider.DefaultAuthRedirect;
+import org.covito.cas.client.provider.DefaultGatewayResolver;
+import org.covito.cas.client.provider.RegexUrlMatcher;
 import org.covito.cas.client.util.LinkUtils;
 import org.covito.cas.client.util.ReflectUtils;
 import org.covito.cas.client.validation.Assertion;
@@ -42,201 +41,155 @@ public class CasClientFilter implements Filter {
 	/**
 	 * 登录请求跳回参数名称
 	 */
-	private String serviceParameterName = "service";
+	protected String serviceParameterName = "service";
 
 	/**
 	 * 登录请求票据参数名称
 	 */
-	private String artifactParameterName = "ticket";
+	protected String artifactParameterName = "ticket";
 
 	/**
 	 * 是否对url进行编码
 	 */
-	private boolean encodeServiceUrl = true;
+	protected boolean encodeServiceUrl = true;
 
 	/**
 	 * 认证通过之后跳到访问页面
 	 * 网站访问域名如covito.cn多个域名之间有空格格开
 	 * 如果访问的域名在serverName没有找到，跳回来的页面使用第一个域名访问
 	 */
-	private String serverName;
+	protected String serverName;
 
 	/**
 	 * 认证通过之后，统一跳到固定页面
 	 */
-	private String service;
+	protected String service;
 	
 	/**
 	 * 当为true时，强制重新登录
 	 * LoginUrl后面带&renew=true
 	 */
-	private boolean renew = false;
+	protected boolean renew = false;
 	    
     /**
      * 如果设定这个参数为true，服务端将不会向客户端索要凭据。 
      * LoginUrl后面带&gateway=true
      */
-    private boolean gateway = false;
+	protected boolean gateway = false;
 
 	/**
 	 * 登录请求地址
 	 */
-	private String serverLoginUrl;
+	protected String serverLoginUrl;
 
 	/**
 	 * Gateway解析器
 	 */
-	private GatewayResolver gatewayResolver=new DefaultGatewayResolver();
+	protected GatewayResolver gatewayResolver=new DefaultGatewayResolver();
 
 	/**
 	 * 认证转发器
 	 */
-	private AuthRedirect authRedirect=new DefaultAuthRedirect();
+	protected AuthRedirect authRedirect=new DefaultAuthRedirect();
 	
 	/**
 	 * 是否以包含的规则过虑
 	 */
-	private boolean isContains=false;
+	protected boolean isContains=false;
 	
 	/**
 	 * url拦截过滤
 	 */
-	private UrlMatcher urlMatcher;
+	protected UrlMatcher urlMatcher;
 	
 	/**===========================Validation===============================*/
 	
 	/**
 	 * 票据校验器
 	 */
-	private TicketValidator ticketValidator;
+	protected TicketValidator ticketValidator;
 
 	/**
 	 * 认证通过之后是否转发
 	 */
-	private boolean redirectAfterValidation = true;
+	protected boolean redirectAfterValidation = true;
 
 	/**
 	 * 校验失败是否抛出异常
 	 */
-	private boolean exceptionOnValidationFailure = false;
+	protected boolean exceptionOnValidationFailure = false;
 	
 	/**
 	 * 是否将Assertion放在session中
 	 */
-	private boolean useSession = true;
+	protected boolean useSession = true;
 	
 	/**
-	 * 获取sslConfig
-	 * @param filterConfig
-	 * @return
+	 * 配置管理器
 	 */
-	protected Properties getSSLConfig(final FilterConfig filterConfig) {
-		final Properties properties = new Properties();
-		final String fileName = getProperty(filterConfig, "sslConfigFile", null);
-
-		if (fileName != null) {
-			FileInputStream fis = null;
-			try {
-				fis = new FileInputStream(fileName);
-				properties.load(fis);
-				logger.trace("Loaded {} entries from {}", properties.size(), fileName);
-			} catch (final IOException ioe) {
-				logger.error(ioe.getMessage(), ioe);
-			} finally {
-				try {
-					fis.close();
-				} catch (IOException e) {
-				}
-			}
-		}
-		return properties;
-	}
+	protected ConfigManager configManager;
 	
-	
-    /**
-     * 获取HostnameVerifier
-     * @param filterConfig
-     * @return
-     */
-    protected HostnameVerifier getHostnameVerifier(final FilterConfig filterConfig) {
-        final String className = getProperty(filterConfig, "hostnameVerifier", null);
-        logger.debug("Using hostnameVerifier parameter: {}", className);
-        
-        final String config = getProperty(filterConfig, "hostnameVerifierConfig", null);
-        logger.debug("Using hostnameVerifierConfig parameter: {}", config);
-        
-        if (className != null) {
-            if (config != null) {
-                return ReflectUtils.newInstance(className, config);
-            } else {
-                return ReflectUtils.newInstance(className);
-            }
-        }
-        return null;
-    }
-	
-
-	protected String getProperty(FilterConfig filterConfig, String propertyName, String defaultValue) {
-		final String value = filterConfig.getInitParameter(propertyName);
-		if (StringUtils.isNotBlank(value)) {
-			logger.debug("Property [{}] loaded from FilterConfig with value [{}]", propertyName, value);
-			return value;
-		}
-		final String value2 = filterConfig.getServletContext().getInitParameter(propertyName);
-		if (StringUtils.isNotBlank(value2)) {
-			logger.debug("Property [{}] loaded from ServletContext with value [{}]", propertyName, value2);
-			return value2;
-		}
-		logger.debug("Property [{}] not found.  Using default value [{}]", propertyName, defaultValue);
-		return defaultValue;
-	}
 
 	@Override
 	public void init(FilterConfig filterConfig) throws ServletException {
-		serverName = getProperty(filterConfig, "serverName", null);
+		
+		String configClass=configManager.getProperty(filterConfig, Constant.configManagerClass, null);
+		if(StringUtils.isNotEmpty(configClass)){
+			this.configManager =ReflectUtils.newInstance(configClass);
+		}else{
+			this.configManager=new ConfigManager() {
+				@Override
+				protected void initInternal(FilterConfig config) {
+					//do nothing
+				}
+			};
+		}
+		this.configManager.init(filterConfig);
+		
+		serverName = configManager.getConfig(Constant.serverName, null);
 		logger.debug("Loading serverName property: {}", this.serverName);
 
-		service = getProperty(filterConfig, "service", null);
+		service = configManager.getConfig( Constant.service, null);
 		logger.debug("Loading service property: {}", this.service);
 
-		artifactParameterName = getProperty(filterConfig, "artifactParameterName", artifactParameterName);
+		artifactParameterName = configManager.getConfig( Constant.artifactParameterName, artifactParameterName);
 		logger.debug("Loading artifact parameter name property: {}", this.artifactParameterName);
 
-		serviceParameterName = getProperty(filterConfig, "serviceParameterName", serviceParameterName);
+		serviceParameterName = configManager.getConfig( Constant.serviceParameterName, serviceParameterName);
 		logger.debug("Loading serviceParameterName property: {} ", this.serviceParameterName);
 
-		encodeServiceUrl = BooleanUtils.toBoolean(getProperty(filterConfig, "encodeServiceUrl", "true"));
+		encodeServiceUrl = BooleanUtils.toBoolean(configManager.getConfig( Constant.encodeServiceUrl, "true"));
 		logger.debug("Loading encodeServiceUrl property: {}", this.encodeServiceUrl);
 		
-		renew=BooleanUtils.toBoolean(getProperty(filterConfig, "renew", "false"));
+		renew=BooleanUtils.toBoolean(configManager.getConfig( Constant.renew, "false"));
         logger.debug("Loaded renew parameter: {}", this.renew);
         
-        gateway=BooleanUtils.toBoolean(getProperty(filterConfig, "gateway", "false"));
+        gateway=BooleanUtils.toBoolean(configManager.getConfig( Constant.gateway, "false"));
         logger.debug("Loaded gateway parameter: {}", this.gateway);
 
-		serverLoginUrl = getProperty(filterConfig, "serverLoginUrl", serverLoginUrl);
+		serverLoginUrl = configManager.getConfig( Constant.serverLoginUrl, serverLoginUrl);
 		logger.debug("Loading serverLoginUrl property: {}", this.serverLoginUrl);
 
-		final String gatewayResolverClass = getProperty(filterConfig, "gatewayResolverClass", null);
+		final String gatewayResolverClass = configManager.getConfig( Constant.gatewayResolverClass, null);
 		if (StringUtils.isNotEmpty(gatewayResolverClass)) {
 			this.gatewayResolver = ReflectUtils.newInstance(gatewayResolverClass);
 		}
 		logger.debug("Loading gatewayResolverClass property: {}", gatewayResolverClass);
 
-		final String authRedirectClass = getProperty(filterConfig, "authRedirectClass", null);
+		final String authRedirectClass = configManager.getConfig( Constant.authRedirectClass, null);
 		if (authRedirectClass != null) {
 			this.authRedirect = ReflectUtils.newInstance(authRedirectClass);
 		}
 		logger.debug("Loading authenticationRedirectStrategyClass property: {}", authRedirectClass);
 
-		final String urlPattern = getProperty(filterConfig, "urlPattern", null);
+		final String urlPattern = configManager.getConfig( Constant.urlPattern, null);
 		logger.debug("Loaded urlPattern parameter: {}", urlPattern);
 		
-		final String urlMatcherClass = getProperty(filterConfig, "urlMatcherClass", "");
+		final String urlMatcherClass = configManager.getConfig( Constant.urlMatcherClass, "");
 		logger.debug("Loaded urlMatcherClass parameter: {}", urlMatcherClass);
 
          
-		isContains = BooleanUtils.toBoolean(getProperty(filterConfig, "isContains", "false"));
+		isContains = BooleanUtils.toBoolean(configManager.getConfig( Constant.isContains, "false"));
 		logger.debug("Loaded isContains parameter: {}", isContains);
 
 		if (StringUtils.isNotEmpty(urlMatcherClass)) {
@@ -252,13 +205,13 @@ public class CasClientFilter implements Filter {
 		
 		/**===================validation========================*/
 		
-		this.redirectAfterValidation=BooleanUtils.toBoolean(getProperty(filterConfig, "redirectAfterValidation","true"));
+		this.redirectAfterValidation=BooleanUtils.toBoolean(configManager.getConfig( Constant.redirectAfterValidation,"true"));
 		logger.debug("Setting redirectAfterValidation parameter: {}", this.redirectAfterValidation);
 		
-		this.exceptionOnValidationFailure=BooleanUtils.toBoolean(getProperty(filterConfig, "exceptionOnValidationFailure","true"));
+		this.exceptionOnValidationFailure=BooleanUtils.toBoolean(configManager.getConfig( Constant.exceptionOnValidationFailure,"true"));
 		logger.debug("Setting exceptionOnValidationFailure parameter: {}", this.exceptionOnValidationFailure);
 		
-		this.useSession=BooleanUtils.toBoolean(getProperty(filterConfig, "useSession","true"));
+		this.useSession=BooleanUtils.toBoolean(configManager.getConfig( Constant.useSession,"true"));
 		logger.debug("Setting useSession parameter: {}", this.useSession);
 		
 		if (!this.useSession && this.redirectAfterValidation) {
@@ -266,7 +219,11 @@ public class CasClientFilter implements Filter {
 			redirectAfterValidation=false;
 		}
 		
-		this.ticketValidator=getTicketValidator(filterConfig);
+		String ticketClass=configManager.getConfig(Constant.ticketValidatorClass, null);
+		if(StringUtils.isNoneEmpty(ticketClass)){
+			this.ticketValidator=ReflectUtils.newInstance(ticketClass);
+			this.ticketValidator.initValidator(configManager);
+		}
 		
 		initInternal(filterConfig);
 
@@ -277,6 +234,14 @@ public class CasClientFilter implements Filter {
 		Assert.assertTrue("renew and gateway cannot both be true. ",!this.renew || !this.gateway);
 		Assert.assertNotNull("serverLoginUrl cannot be null.",this.serverLoginUrl);
 		Assert.assertNotNull("ticketValidator cannot be null.",this.ticketValidator );
+	}
+	
+	/**
+	 * 自定义初始化
+	 * @param filterConfig
+	 */
+	protected void initInternal(FilterConfig filterConfig){
+		
 	}
 	
 	/**
@@ -314,24 +279,6 @@ public class CasClientFilter implements Filter {
 		
 	}
 	
-	/**
-	 * 等待被重写
-	 * @param filterConfig
-	 * @return
-	 */
-	protected TicketValidator getTicketValidator(final FilterConfig filterConfig) {
-        return this.ticketValidator;
-    }
-
-	/**
-	 * 自定义参数获取方法(当不想在web.xml配置时重写此方法)
-	 * 
-	 * @param filterConfig
-	 * @throws ServletException
-	 */
-	protected void initInternal(final FilterConfig filterConfig) throws ServletException {
-	}
-
 	@Override
 	public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain chain) throws IOException,
 			ServletException {
@@ -351,11 +298,11 @@ public class CasClientFilter implements Filter {
 		if (assertion == null) {
 			final String serviceUrl = constructServiceUrl(request, response);
 			
-			final String ticket = LinkUtils.getParameter(request, this.artifactParameterName);
+			final String serviceTicket = LinkUtils.getParameter(request, this.artifactParameterName);
 			
 			final boolean wasGatewayed = this.gateway && this.gatewayResolver.hasAlready(request, serviceUrl);
 
-			if (StringUtils.isBlank(ticket) && !wasGatewayed) {
+			if (StringUtils.isBlank(serviceTicket) && !wasGatewayed) {
 				final String modifiedServiceUrl;
 
 				logger.debug("no ticket and no assertion found");
@@ -382,12 +329,12 @@ public class CasClientFilter implements Filter {
             return;
         }
 		
-		final String ticket = LinkUtils.getParameter(request, this.artifactParameterName);
+		final String serviceTicket = LinkUtils.getParameter(request, this.artifactParameterName);
 
-		if (StringUtils.isNotBlank(ticket)) {
-			logger.debug("Attempting to validate ticket: {}", ticket);
+		if (StringUtils.isNotBlank(serviceTicket)) {
+			logger.debug("Attempting to validate ticket: {}", serviceTicket);
 			try {
-				assertion = this.ticketValidator.validate(ticket, constructServiceUrl(request, response));
+				assertion = this.ticketValidator.validate(serviceTicket, constructServiceUrl(request, response));
 				logger.debug("Successfully authenticated user: {}", assertion.getPrincipal().getName());
 				request.setAttribute(CONST_CAS_ASSERTION, assertion);
 				if (this.useSession) {

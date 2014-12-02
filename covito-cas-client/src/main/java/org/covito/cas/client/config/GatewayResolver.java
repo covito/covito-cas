@@ -1,4 +1,4 @@
-package org.covito.cas.client;
+package org.covito.cas.client.config;
 
 import javax.servlet.http.HttpServletRequest;
 

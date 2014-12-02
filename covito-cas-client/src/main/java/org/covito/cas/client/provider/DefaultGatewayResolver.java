@@ -1,9 +1,9 @@
-package org.covito.cas.client.auth;
+package org.covito.cas.client.provider;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
-import org.covito.cas.client.GatewayResolver;
+import org.covito.cas.client.config.GatewayResolver;
 
 public class DefaultGatewayResolver implements GatewayResolver {
 

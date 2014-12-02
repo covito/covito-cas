@@ -47,7 +47,7 @@ public interface Assertion extends Serializable {
 
     
     /**
-     * 是否已较验
+     * 是否有效
      * @return
      */
     boolean isValid();
