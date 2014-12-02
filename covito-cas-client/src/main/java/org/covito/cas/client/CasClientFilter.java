@@ -24,6 +24,7 @@ import org.covito.cas.client.config.UrlMatcher;
 import org.covito.cas.client.exception.TicketValidationException;
 import org.covito.cas.client.provider.DefaultAuthRedirect;
 import org.covito.cas.client.provider.DefaultGatewayResolver;
+import org.covito.cas.client.provider.PropertiesConfigManager;
 import org.covito.cas.client.provider.RegexUrlMatcher;
 import org.covito.cas.client.util.LinkUtils;
 import org.covito.cas.client.util.ReflectUtils;
@@ -37,6 +38,11 @@ public class CasClientFilter implements Filter {
 	protected final Logger logger = LoggerFactory.getLogger(getClass());
 	
 	public static final String CONST_CAS_ASSERTION = "_const_cas_assertion_";
+	
+	/**
+	 * 是否启用单点登录
+	 */
+	protected boolean enable=true;
 
 	/**
 	 * 登录请求跳回参数名称
@@ -78,9 +84,9 @@ public class CasClientFilter implements Filter {
 	protected boolean gateway = false;
 
 	/**
-	 * 登录请求地址
+	 * 登录请求地址前缀
 	 */
-	protected String serverLoginUrl;
+	protected String serverUrl;
 
 	/**
 	 * Gateway解析器
@@ -133,9 +139,12 @@ public class CasClientFilter implements Filter {
 	@Override
 	public void init(FilterConfig filterConfig) throws ServletException {
 		
-		String configClass=configManager.getProperty(filterConfig, Constant.configManagerClass, null);
+		String configClass=ConfigManager.getProperty(filterConfig, Constant.configManagerClass, null);
+		String configFile=ConfigManager.getProperty(filterConfig, Constant.configFile, null);
 		if(StringUtils.isNotEmpty(configClass)){
 			this.configManager =ReflectUtils.newInstance(configClass);
+		}else if(StringUtils.isNotEmpty(configFile)){
+			this.configManager =new PropertiesConfigManager();
 		}else{
 			this.configManager=new ConfigManager() {
 				@Override
@@ -161,14 +170,20 @@ public class CasClientFilter implements Filter {
 		encodeServiceUrl = BooleanUtils.toBoolean(configManager.getConfig( Constant.encodeServiceUrl, "true"));
 		logger.debug("Loading encodeServiceUrl property: {}", this.encodeServiceUrl);
 		
+		enable = BooleanUtils.toBoolean(configManager.getConfig( Constant.enable, "true"));
+		logger.debug("Loading enable property: {}", this.enable);
+		
 		renew=BooleanUtils.toBoolean(configManager.getConfig( Constant.renew, "false"));
         logger.debug("Loaded renew parameter: {}", this.renew);
         
         gateway=BooleanUtils.toBoolean(configManager.getConfig( Constant.gateway, "false"));
         logger.debug("Loaded gateway parameter: {}", this.gateway);
 
-		serverLoginUrl = configManager.getConfig( Constant.serverLoginUrl, serverLoginUrl);
-		logger.debug("Loading serverLoginUrl property: {}", this.serverLoginUrl);
+		serverUrl = configManager.getConfig( Constant.serverUrl, serverUrl);
+		if(StringUtils.isNotEmpty(serverUrl)&&!StringUtils.endsWith(serverUrl, "/")){
+			serverUrl=serverUrl+"/";
+		}
+		logger.debug("Loading serverUrl property: {}", this.serverUrl);
 
 		final String gatewayResolverClass = configManager.getConfig( Constant.gatewayResolverClass, null);
 		if (StringUtils.isNotEmpty(gatewayResolverClass)) {
@@ -232,7 +247,7 @@ public class CasClientFilter implements Filter {
 		Assert.assertTrue("serverName or service must be set.",StringUtils.isNotEmpty(this.serverName) || StringUtils.isNotEmpty(this.service));
 		Assert.assertTrue("serverName and service cannot both be set. ",StringUtils.isBlank(this.serverName) || StringUtils.isBlank(this.service));
 		Assert.assertTrue("renew and gateway cannot both be true. ",!this.renew || !this.gateway);
-		Assert.assertNotNull("serverLoginUrl cannot be null.",this.serverLoginUrl);
+		Assert.assertNotNull("serverUrl cannot be null.",this.serverUrl);
 		Assert.assertNotNull("ticketValidator cannot be null.",this.ticketValidator );
 	}
 	
@@ -285,6 +300,11 @@ public class CasClientFilter implements Filter {
 		
 		final HttpServletRequest request = (HttpServletRequest) servletRequest;
 		final HttpServletResponse response = (HttpServletResponse) servletResponse;
+		
+		if(!enable){
+			chain.doFilter(request, response);
+			return;
+		}
 
 		if (isRequestUrlExcluded(request)) {
 			logger.debug("Request is ignored.");
@@ -364,20 +384,24 @@ public class CasClientFilter implements Filter {
 
 	/**
 	 * 构建转发路径
-	 * @param serverLoginUrl2
-	 * @param serviceParameterName2
 	 * @param modifiedServiceUrl
-	 * @param renew2
-	 * @param gateway2
 	 * @return
 	 */
 	private String constructRedirectUrl(String serviceUrl) {
 		 try {
-			return serverLoginUrl + (serverLoginUrl.contains("?") ? "&" : "?") + serviceParameterName + "="
+			return serverUrl+getLoginUrlSuffix() + (serverUrl.contains("?") ? "&" : "?") + serviceParameterName + "="
 			            + URLEncoder.encode(serviceUrl, "UTF-8") + (renew ? "&renew=true" : "") + (gateway ? "&gateway=true" : "");
 		} catch (UnsupportedEncodingException e) {
 			throw new RuntimeException(e);
 		}
+	}
+	
+	/**
+	 * 获取登录地址后缀
+	 * @return
+	 */
+	protected String getLoginUrlSuffix(){
+		return "login";
 	}
 
 	/**

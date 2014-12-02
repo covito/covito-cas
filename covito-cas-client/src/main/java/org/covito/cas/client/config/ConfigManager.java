@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory;
 
 public abstract class ConfigManager {
 	
-	protected Logger logger=LoggerFactory.getLogger(getClass());
+	protected static Logger logger=LoggerFactory.getLogger(ConfigManager.class);
 
 	protected final Map<String,String> config=new HashMap<String, String>();
 	
@@ -37,7 +37,7 @@ public abstract class ConfigManager {
 	 * @param defaultValue
 	 * @return
 	 */
-	public String getProperty(FilterConfig filterConfig, String propertyName, String defaultValue) {
+	public static String getProperty(FilterConfig filterConfig, String propertyName, String defaultValue) {
 		final String value = filterConfig.getInitParameter(propertyName);
 		if (StringUtils.isNotBlank(value)) {
 			logger.debug("Property [{}] loaded from FilterConfig with value [{}]", propertyName, value);

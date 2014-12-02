@@ -8,29 +8,13 @@
 		<description>CAS Client</description>
 		<filter-name>CasClientFilter</filter-name>
 		<filter-class>org.covito.cas.client.CasClientFilter</filter-class>
-		<init-param>
-			<param-name>serverUrl</param-name>
-			<param-value>http://localhost:8082/cas-server</param-value>
-		</init-param>
-		<init-param>
-			<param-name>serverName</param-name>
-			<param-value>localhost 127.0.0.1 covito.cn</param-value>
-		</init-param>
 		<!-- <init-param>
-			<param-name>service</param-name>
-			<param-value>http://localhost:8080/cas-demo/index.jsp</param-value>
-		</init-param> -->
-		<!-- <init-param>
-			<param-name>gateway</param-name>
-			<param-value>true</param-value>
+			<param-name>configManagerClass</param-name>
+			<param-value>org.covito.cas.client.provider.PropertiesConfigManager</param-value>
 		</init-param> -->
 		<init-param>
-			<param-name>urlPattern</param-name>
-			<param-value>/A.jsp</param-value>
-		</init-param>
-		<init-param>
-			<param-name>ticketValidatorClass</param-name>
-			<param-value>org.covito.cas.client.provider.Cas20ServiceTicketValidator</param-value>
+			<param-name>configFile</param-name>
+			<param-value>/cas-client.properties</param-value>
 		</init-param>
 	</filter>
 	

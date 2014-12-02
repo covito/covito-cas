@@ -9,6 +9,8 @@
 		<module>covito-cas-server</module>
 		<module>covito-cas-client</module>
 		<module>covito-cas-demo</module>
+		<module>covito-demo-proxy</module>
+		<module>covito-cas-demo-proxy</module>
 	</modules>
 
 	<properties>

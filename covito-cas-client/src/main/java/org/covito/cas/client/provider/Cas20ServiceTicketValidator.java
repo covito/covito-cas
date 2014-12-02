@@ -44,7 +44,7 @@ public class Cas20ServiceTicketValidator extends AbstractTicketValidator {
 	@Override
 	public void initValidator(ConfigManager config) {
 		super.initValidator(config);
-		this.proxyRetriever = new Cas20ProxyRetriever(serverValidatorUrl, encoding, urlConnectionFactory);
+		this.proxyRetriever = new Cas20ProxyRetriever(serverUrl, encoding, urlConnectionFactory);
 	}
 
 	protected Map<String, Object> extractCustomAttributes(final String xml) {

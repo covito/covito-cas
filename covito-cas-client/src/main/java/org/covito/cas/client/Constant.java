@@ -17,6 +17,13 @@ public class Constant {
 		}
 	}
 
+	/**
+	 * 是否启用
+	 */
+	public static final String enable="enable";
+	
+	public static final String configFile="configFile";
+	
 	public static final String configManagerClass="configManagerClass";
 	
 	public static final String serverName="serverName";
@@ -33,7 +40,7 @@ public class Constant {
 	
 	public static final String gateway="gateway";
 	
-	public static final String serverLoginUrl="serverLoginUrl";
+	public static final String serverUrl="serverUrl";
 	
 	public static final String gatewayResolverClass="gatewayResolverClass";
 	
@@ -54,7 +61,5 @@ public class Constant {
 	public static final String useSession="useSession";
 	
 	public static final String ticketValidatorClass="ticketValidatorClass";
-	
-	public static final String serverValidatorUrl="serverValidatorUrl";
 	
 }

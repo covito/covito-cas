@@ -35,7 +35,7 @@ public abstract class AbstractTicketValidator implements TicketValidator {
 	/**
 	 * 验证票据地址
 	 */
-	protected String serverValidatorUrl;
+	protected String serverUrl;
 	
 	/**
 	 * 编码格式
@@ -72,9 +72,8 @@ public abstract class AbstractTicketValidator implements TicketValidator {
 
 	@Override
 	public void initValidator(ConfigManager config) {
-		this.serverValidatorUrl = config.getConfig(Constant.serverValidatorUrl, null);
+		this.serverUrl = config.getConfig(Constant.serverUrl, null);
 		this.renew=BooleanUtils.toBoolean(config.getConfig( Constant.renew, "false"));
-		Assert.assertNotNull("serverValidatorUrl cannot be null.", this.serverValidatorUrl);
 	}
 
 	/**
@@ -111,13 +110,13 @@ public abstract class AbstractTicketValidator implements TicketValidator {
 		}
 
 		final String suffix = getUrlSuffix();
-		final StringBuilder buffer = new StringBuilder(urlParameters.size() * 10 + this.serverValidatorUrl.length()
+		final StringBuilder buffer = new StringBuilder(urlParameters.size() * 10 + this.serverUrl.length()
 				+ suffix.length() + 1);
 
 		int i = 0;
 
-		buffer.append(this.serverValidatorUrl);
-		if (!this.serverValidatorUrl.endsWith("/")) {
+		buffer.append(this.serverUrl);
+		if (!this.serverUrl.endsWith("/")) {
 			buffer.append("/");
 		}
 		buffer.append(suffix);
