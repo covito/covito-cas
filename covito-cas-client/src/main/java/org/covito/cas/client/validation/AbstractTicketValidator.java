@@ -144,7 +144,7 @@ public abstract class AbstractTicketValidator implements TicketValidator {
 	 * @return
 	 */
 	protected String retrieveResponseFromServer(URL validationUrl, String ticket){
-		return LinkUtils.getResponseFromServer(validationUrl, urlConnectionFactory , ticket);
+		return LinkUtils.getResponseFromServer(validationUrl, urlConnectionFactory , this.encoding);
 	}
 
 	/**
