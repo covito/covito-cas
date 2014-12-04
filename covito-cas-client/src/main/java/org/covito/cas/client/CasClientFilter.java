@@ -26,10 +26,10 @@ import org.covito.cas.client.provider.DefaultAuthRedirect;
 import org.covito.cas.client.provider.DefaultGatewayResolver;
 import org.covito.cas.client.provider.PropertiesConfigManager;
 import org.covito.cas.client.provider.RegexUrlMatcher;
+import org.covito.cas.client.util.Assert;
 import org.covito.cas.client.util.LinkUtils;
 import org.covito.cas.client.util.ReflectUtils;
 import org.covito.cas.client.validation.Assertion;
-import org.junit.Assert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -5,7 +5,7 @@ import java.util.Date;
 import java.util.Map;
 
 import org.covito.cas.client.auth.AttributePrincipal;
-import org.junit.Assert;
+import org.covito.cas.client.util.Assert;
 
 public class AssertionImpl implements Assertion {
 

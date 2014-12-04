@@ -1,9 +1,6 @@
 package org.covito.cas.client.validation;
 
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
-import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
@@ -11,7 +8,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.lang3.BooleanUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.covito.cas.client.Constant;
 import org.covito.cas.client.config.ConfigManager;
 import org.covito.cas.client.config.TicketValidator;
@@ -19,7 +15,6 @@ import org.covito.cas.client.exception.TicketValidationException;
 import org.covito.cas.client.ssl.HttpURLConnectionFactory;
 import org.covito.cas.client.ssl.HttpsURLConnectionFactory;
 import org.covito.cas.client.util.LinkUtils;
-import org.junit.Assert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

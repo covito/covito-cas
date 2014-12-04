@@ -4,7 +4,7 @@ import java.util.Collections;
 import java.util.Map;
 
 import org.covito.cas.client.proxy.ProxyRetriever;
-import org.junit.Assert;
+import org.covito.cas.client.util.Assert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

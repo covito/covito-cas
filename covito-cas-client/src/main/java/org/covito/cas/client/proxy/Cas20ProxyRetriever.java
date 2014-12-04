@@ -5,9 +5,9 @@ import java.net.URLEncoder;
 
 import org.apache.commons.lang3.StringUtils;
 import org.covito.cas.client.ssl.HttpURLConnectionFactory;
+import org.covito.cas.client.util.Assert;
 import org.covito.cas.client.util.LinkUtils;
 import org.covito.cas.client.util.XmlUtils;
-import org.junit.Assert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
