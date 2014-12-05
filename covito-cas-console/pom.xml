@@ -6,6 +6,6 @@
 		<artifactId>covito-cas-parent</artifactId>
 		<version>0.0.1-SNAPSHOT</version>
 	</parent>
-	<artifactId>covito-cas-server</artifactId>
+	<artifactId>covito-cas-console</artifactId>
 	<packaging>war</packaging>
 </project>
