@@ -1,0 +1,15 @@
+{
+  "name": "covito-node",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "start": "pm2 app.js -i max -e logs/err.log -o logs/out.log",
+    "stop" : "pm2 stop all",
+    "restart" : "pm2 reload all"
+  },
+  "dependencies": {
+    "express": "3.2.6",
+    "ejs": "*",
+    "winston" : "~0.7.3"
+  }
+}

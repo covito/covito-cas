@@ -1,0 +1,33 @@
+#!/usr/bin/env node
+/**
+ * 利用cluster启动多个node进程，防止异常crash和利用多CPU
+ * @type {exports}
+ */
+var cluster = require('cluster'),
+    numCPUs = require('os').cpus().length,
+    config = require('../app-config'),
+    log = require('../lib/utils/log-utils');
+
+var app = require('../app');
+
+if(config.debug) {
+    // 测试环境直接启动，不然不能debug
+    var app = require('../app');
+}else {
+    if (cluster.isMaster) {
+        // Fork workers.
+        for (var i = 0; i < numCPUs; i++) {
+            cluster.fork();
+        }
+
+        cluster.on('exit', function(worker, code, signal) {
+            //console.error('-----died----------')
+            log.error('worker ' + worker.process.pid + ' died');
+            // 启动新进程代替
+            cluster.fork();
+        });
+    }else{
+        var app = require('../app');
+    }
+}
+
