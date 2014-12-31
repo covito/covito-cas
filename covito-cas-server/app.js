@@ -4,6 +4,9 @@
 
 var express = require('express'), 
 	routes = require('./routes'), 
+	favicon = require('static-favicon'),
+    cookieParser = require('cookie-parser'),
+    bodyParser = require('body-parser'),
 	http = require('http'), 
 	path = require('path'), 
 	log = require('./lib/utils/log-utils.js'),
@@ -19,14 +22,21 @@ app.set('port', config.port);
 //注册模板引擎
 app.engine('.html', require('ejs').__express);
 
+app.enable('strict routing');
+app.disable('etag');
+
 //模板目录
 app.set('views', __dirname + '/views');
 app.set('view engine', 'html');
-app.use(express.favicon());
-app.use(express.logger('dev'));
-app.use(express.bodyParser());
-app.use(express.methodOverride());
-app.use(app.router);
+
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded());
+app.use(cookieParser());
+
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded());
+app.use(cookieParser());
+
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.set('env',config.debug ? 'development' :'production');

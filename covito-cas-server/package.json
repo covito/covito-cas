@@ -1,5 +1,5 @@
 {
-  "name": "covito-node",
+  "name": "covito-cas-server",
   "version": "0.0.1",
   "private": true,
   "scripts": {
@@ -8,8 +8,14 @@
     "restart" : "pm2 reload all"
   },
   "dependencies": {
-    "express": "3.2.6",
-    "ejs": "*",
-    "winston" : "~0.7.3"
+	"express": "~4.0.0",
+	"static-favicon": "~1.0.0",
+	"cookie-parser": "~1.0.1",
+	"body-parser": "~1.0.0",
+	"debug": "~0.7.4",
+	"ejs": "~0.8.5",
+	"eventproxy": "*",
+	"request" : "*",
+	"winston" : "~0.7.3"
   }
 }
