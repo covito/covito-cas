@@ -12,49 +12,48 @@ var express = require('express'),
 	log = require('./lib/utils/log-utils.js'),
 	config = require('./app-config');
 
+//默认5个
 http.globalAgent.maxSockets = 50;
 
 var app = express();
 
-// all environments
-app.set('port', config.port);
+app.set('env',config.debug ? 'development' :'production');
 
 //注册模板引擎
 app.engine('.html', require('ejs').__express);
 
+//严格路由，默认情况下 "/foo" 和 "/foo/" 是被同样对待的
 app.enable('strict routing');
+
+//禁用etag缓存
 app.disable('etag');
 
 //模板目录
 app.set('views', __dirname + '/views');
 app.set('view engine', 'html');
 
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded());
-app.use(cookieParser());
+//定义favicon
+app.use(favicon(__dirname + '/public/favicon.ico',{maxAge:31536000000}));
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded());
 app.use(cookieParser());
 
-app.use(express.static(path.join(__dirname, 'public')));
-
-app.set('env',config.debug ? 'development' :'production');
+//静态目录
+app.use(config.context +'public',express.static(path.join(__dirname, 'public')));
 
 //开发环境下使用异常处理
-if ('development' == app.get('env')) {
+if (config.debug) {
 	app.use(express.errorHandler());
 }
 
-//生产环境下开启模板缓存
-if('production' == app.get('env')){
-    app.enable('view cache');
-}
+app.locals.g_config = config;
 
+//路由配置
 app.get('/', routes.index);
 
-http.createServer(app).listen(app.get('port'), function() {
-	console.log('Express server listening on port ' + app.get('port'));
+http.createServer(app).listen(config.port, function() {
+	console.log('Express server listening on port ' + config.port);
 });
 
 process.on('uncaughtException', function(err) {
