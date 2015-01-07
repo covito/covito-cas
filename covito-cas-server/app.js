@@ -3,11 +3,11 @@
  */
 
 var express = require('express'), 
-	routes = require('./routes'), 
+	routes = require('./lib/routes/static-router'),
 	favicon = require('static-favicon'),
     cookieParser = require('cookie-parser'),
     bodyParser = require('body-parser'),
-	http = require('http'), 
+	http = require('http'),
 	path = require('path'), 
 	log = require('./lib/utils/log-utils.js'),
 	config = require('./app-config');
@@ -50,7 +50,7 @@ if (config.debug) {
 app.locals.g_config = config;
 
 //路由配置
-app.get('/', routes.index);
+routes.setRequestUrl(app);
 
 http.createServer(app).listen(config.port, function() {
 	console.log('Express server listening on port ' + config.port);
