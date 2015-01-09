@@ -1,0 +1,43 @@
+<style type="text/css">
+    .navError{
+        width: 165px;float:left;
+    }
+    .navError h3,.navError h3 a{
+        font-size:16px;line-height:50px;
+    }
+    .navError a{
+        line-height:24px;font-size:12px;
+        color:#11B6E6;text-decoration:none;
+        display:block;
+    }
+    .navError h3 a{
+        color:#000;
+    }
+</style>
+<div id="main_content" style="background:#f6f6f6;">
+    <div class="container" style="margin-top:25px;width:100%;">
+        <div style="width:100%;background:#fff;" class="clearfix">
+            <div style="width:1000px;margin:auto;" class="clearfix">
+                <div class="error404"></div>
+                <h1 style="font-size:24px;font-weight:bold;padding:20px 0 45px 0px;float:left;margin-left:68px;">
+                    <%if(code == "404"){%>
+                    很抱歉，你要查找的页面找不到。
+                    <%}else if((code == "403")){ %>
+                    很抱歉，您没有访问此操作的权限!
+                    <%}else{%>
+                    很抱歉，暂时出了点小问题，我们正在努力修复!
+                    <%} %>
+                </h1>
+            </div>
+        </div>
+    </div>
+
+    <div >
+        <h3><%= (typeof message === 'undefined'?'':message) %></h3>
+        <div><%= (typeof body === 'undefined'?'':body) %></div>
+
+        <div style="display:none;">
+            <%= (typeof stack === 'undefined'?'':stack) %>
+        </div>
+    </div>
+</div>
